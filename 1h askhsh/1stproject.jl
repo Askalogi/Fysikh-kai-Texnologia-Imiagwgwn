@@ -40,8 +40,8 @@ end
 #TODO HYPERPARAMETERS
 #Efoson exoume mia analigoa sta Nc kai Nv apo ton arxiko typo 
 #Tha xrisimopoihsw ton idio tipo me prin apla tha exw kai to T/300 ^ 3/2
-Nc_300 = 2.8 *10^19 #(cm^-3)
-Nv_300 = 1*10^19 #(cm^-3)
+Nc_300 = 2.8e19 #(cm^-3)
+Nv_300 = 1e19 #(cm^-3)
 n_i_1c = Float64[]
 
 
@@ -76,21 +76,21 @@ savefig(plot_1, "Set 1o Askhsh 1")
 #TODO HYPERPARAMETERS 
 Nd = 10^16 #(cm^-3)
 #shmatniko thetw to Ec ~= Ef afou douleyv me diafores ara Ed - Ef = Ec-0.054-Ef ara feugoun ara =-0.054
-Ec = 0
-Ed = Ec- 0.054 # (eV) kai to Ec einai tou pyritiou
+
+Ed = - 0.054 # (eV) kai to Ec einai tou pyritiou analogo tou Ec
 n_ion=[] # Sygkentrwsh ionizsmenwn prosmiksewn
 
 for T in T_values
-
-    n_d_plus = Nd/(1+2*exp((-0.054)/(k*T)))
-    push!(n_ion,n_d_plus)
-
+    Nc_T = Nc_300 * ((T/ 300))^(3/2)
+    Ef_T = k * T * log(Nd/Nc_T)
+    n_d_plus = Nd / (1 + 2 * exp((Ed - Ef_T) / (k * T)))
+    push!(n_ion, n_d_plus)
 end
 
 plot_2 = plot(
     T_values,[n_ion],
     yscale = :log10,
-    ylim=(1e15,1e17),
+    
     ylabel= "Συγκέντρωση Ιονισμένων Προσμίξεων (cm^-3)",
     xlabel = "Θερμοκρασια (Τ)",
     title= "Συγκέντρωση Προσμίξεων Si με As",
@@ -98,7 +98,6 @@ plot_2 = plot(
     linewidth = 3,
     color = [:maroon]
 )
-
 savefig(plot_2, "Set 1o Askhsh 2.png")
 
 #! ONE FINAL PLOT ALL OF THEM TOGETHER
@@ -106,7 +105,7 @@ savefig(plot_2, "Set 1o Askhsh 2.png")
 plot_all1 = plot(
     T_values,[n_i_1c,n_ion],
     yscale = :log10,
-    ylim=(1e0,1e20),
+    ylim=(1e-10,1e20),
     ylabel= "Συγκεντρωση Ηλεκτρονιων (cm^-3)",
     xlabel = "Θερμοκρασια (Τ)",
     title = "Συγκεντρωση Ηλεκτρονιων Ενδογενων/Προσμιξεων",
@@ -123,7 +122,6 @@ savefig(plot_all1, "Set 1o Askhsh 2 με κανονικη κλιμακα.png")
 plot_all2 = plot(
     1 ./T_values,[n_i_1c,n_ion],
     yscale = :log10,
-    ylim = (1e-30,1e20),
     ylabel= "Συγκεντρωση Ηλεκτρονιων (cm^-3)",
     xlabel = "Θερμοκρασια (1/Τ)",
     title = "Συγκεντρωση Ηλεκτρονιων Ενδογενων/Προσμιξεων",
