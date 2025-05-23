@@ -7,6 +7,7 @@ This is the second set of excercises for the course Φυσικη και Τεχν
 
 using Plots
 using DataFrames
+using XLSX
 
 #! ------------- 2h Erwtisi ------------------
 #? a erwtima --------->
@@ -27,8 +28,8 @@ k = 12
 # Bohthitikos syntelestis
 boi_syt = Float64[]
 
-for i in C 
-    push!(boi_syt, 1/i^2)
+for i in eachindex(C) 
+    push!(boi_syt, 1/(C[i])^2)
 end
     
 print(boi_syt)
@@ -71,7 +72,7 @@ plot!(V_r, fit_line,
 
 
 # Αποθήκευση
-savefig(plot_2a, "../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/Α_Ερωτημα.png")
+savefig(plot_2a, "../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/2Α_Ερωτημα.png")
 
 #? β Ερωτημα ---------------->
 # Να = Νd = Ν efosonexoume idio arithmo prosmijewn n kai p
@@ -147,7 +148,7 @@ plot_2c = plot(
     color = :blueviolet
 )   
 
-savefig(plot_2c, "../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/Γ_Ερωτημα.png")
+savefig(plot_2c, "../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/2Γ_Ερωτημα.png")
 
 # δ Ερωτημα ->
 
@@ -162,7 +163,7 @@ plot_2d_1 = plot(
     color = :blueviolet
 )
 
-savefig(plot_2d_1, "../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/Δ_Ερωτημα_1.png")
+savefig(plot_2d_1, "../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/2Δ_Ερωτημα_1.png")
 
 plot_2d_2 = plot(
     V_r, E_max,
@@ -175,7 +176,7 @@ plot_2d_2 = plot(
     color = :blueviolet
 )
 
-savefig(plot_2d_2, "../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/Δ Ερωτημα 2.png")
+savefig(plot_2d_2, "../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/2Δ Ερωτημα 2.png")
 
 # ε Ερωτημα ->
 
@@ -190,8 +191,85 @@ plot_2e = plot(
     color = :blueviolet
 )
 
-savefig(plot_2e, "../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/E Ερωτημα.png")
-
+savefig(plot_2e, "../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/2E Ερωτημα.png")
 
 #!-------------------------------- 3h Erwtisi -----------------------------------------
 
+#? α) Ερωτημα ------------------------------------>
+
+C_0 = 8e-12 #F
+C_5 = 3.2e-12 #F 
+
+#boithitioi syntelestes
+
+boi_syt_0 = 1/(C_0^2)
+boi_syt_5 = 1/(C_5^2)
+
+#Euresi klishs a kai tomis b
+
+a_ = (boi_syt_5 - boi_syt_0)/(-5-0)
+
+b_ = (boi_syt_0)
+
+V_bi = -b_/a_ #einai konta stin timi 1 eV
+
+#? β) Ερωτημα -------------------------------------->
+A = 1.6e-4 #cm^2
+N_L = 2/(q*e_s*A^2*abs(a_)) #cm^-3
+
+#? γ) Ερωτημα ----------------------------------->
+T = 300 # K 
+k =  1.38e-23 # 
+q = 1.6e-19
+n_i = 1.5e10 #cm^-3
+V_bi
+idk = k*T/q
+
+N_H = ((n_i^2) / (N_L))*exp(V_bi/idk) #3 tajeis megethous panw 
+
+
+#! --------------------------------- 1h Erwtisi (BONUS) ---------------------------------------
+
+xf = XLSX.openxlsx("./Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/double-diode2025-start example.xlsx")
+
+sh = xf["ddiode"]
+sh[:]
+
+data = XLSX.getdata(sh)
+data
+Voltage = data[2:46] #Voltages (Volt)
+Currents = data[2:46,2] # Currents (A)
+
+ln_I = Float64[]
+
+for i in eachindex(Currents)
+    push!(ln_I,log(Currents[i]))
+end
+
+println(ln_I)
+
+plot_1_1 = plot(
+    Voltage,ln_I,
+    xlabel = "Voltage of the Diode (V)",
+    ylabel = "Logarithmic Current of the diode ln(I)",
+    title = " ln(I) - Voltage",
+    linewidth = 5,
+    marker = :hexagon,
+    markercolor = :orange2,
+    color = :blueviolet
+)
+
+savefig(plot_1_1, "./Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/1 ln(I) V.png")
+
+I_s_low = Float64[]
+I_s_high = Float64[]
+n_l = 1
+n_h = 2
+
+for i in eachindex(Voltage)
+    push!(I_s_low, Currents[i]/(exp(Voltage[i]/(n_l*idk))-1))
+    push!(I_s_high, Currents[i]/exp(Voltage[i]/(n_h*idk)))
+end
+
+I_s_low
+I_s_high
