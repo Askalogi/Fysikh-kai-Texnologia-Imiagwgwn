@@ -10,7 +10,7 @@ using DataFrames
 using XLSX
 
 #! ------------- 2h Erwtisi ------------------
-#? a erwtima --------->
+#? a erwtima ---------> 
 #diatomi
 A = 0.04 * 0.04 #cm * cm
 
@@ -230,7 +230,7 @@ N_H = ((n_i^2) / (N_L))*exp(V_bi/idk) #3 tajeis megethous panw
 
 #! --------------------------------- 1h Erwtisi (BONUS) ---------------------------------------
 
-xf = XLSX.openxlsx("./Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/double-diode2025-start example.xlsx")
+xf = XLSX.openxlsx("../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/double-diode2025-start example.xlsx")
 
 sh = xf["ddiode"]
 sh[:]
@@ -259,17 +259,116 @@ plot_1_1 = plot(
     color = :blueviolet
 )
 
-savefig(plot_1_1, "./Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/1 ln(I) V.png")
+savefig(plot_1_1, "../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/1 ln(I) V.png")
 
-I_s_low = Float64[]
-I_s_high = Float64[]
-n_l = 1
-n_h = 2
+# I_s_low = Float64[]
+# I_s_high = Float64[]
+# n_l = 1
+# n_h = 2
+
+# for i in eachindex(Voltage)
+#     push!(I_s_low, Currents[i]/(exp(Voltage[i]/(n_l*idk))-1))
+#     push!(I_s_high, Currents[i]/exp(Voltage[i]/(n_h*idk)))
+# end
+
+# I_s_low
+# I_s_high
+
+#Για μεγαλες τασεις MONO
+V_corr = Float64[]
+R_s = 1 #Ohm
 
 for i in eachindex(Voltage)
-    push!(I_s_low, Currents[i]/(exp(Voltage[i]/(n_l*idk))-1))
-    push!(I_s_high, Currents[i]/exp(Voltage[i]/(n_h*idk)))
+    push!(V_corr, Voltage[i] - Currents[i]*R_s)
 end
 
-I_s_low
-I_s_high
+V_corr
+
+#κλιση εχε την μορφη m = q/nkt και η τομη b = ln(Is)
+# Για την πρωτη ευθεια θα εχουμε τιμες τασης απο 0.18 μεχρι και 0.28 index 10-16
+n_1 = 7
+helper1 = Float64[]
+for i in 10:16
+    push!(helper1,ln_I[i]*Voltage[i])
+end
+
+helper2 = Float64[]
+for i in 10:16
+    push!(helper2 ,Voltage[i]^2)
+end
+
+sumx_l = sum(Voltage[10:16])
+sumy_l = sum(ln_I[10:16])
+sumxy_l = sum(helper1)
+sumx2_l = sum(helper2)
+
+m_l  = ((n_1 * sumxy_l) - (sumx_l*sumy_l))/(n_1*sumx2_l-(sumx_l)^2)
+
+b_l = (sumy_l-m_l*sumx_l)/n_1
+
+Is_l = exp(b_l)
+
+n_l = q/(m_l*k*T) #peripoy iso me 2 
+
+y_line_l = m_l .* Voltage .+ b_l
+plot!(Voltage, y_line_l, label="Ευθεία y = ax + b για χαμηλες τασεις.", color=:red, lw=2)
+# Για την δευτερη ευθεια στις μεγαλες τασεις θα εχουμε απο 0.68 μεχρι και 0.76 index 35-39
+
+#1 proseggish XWRIS V_corr
+n_2 = 5
+
+helper3 = Float64[]
+for i in 35:39
+    push!(helper3,ln_I[i]*Voltage[i])
+end
+
+helper4 = Float64[]
+for i in 35:39
+    push!(helper4 ,Voltage[i]^2)
+end
+
+sumx_h = sum(Voltage[35:39])
+sumy_h = sum(ln_I[35:39])
+sumxy_h = sum(helper3)
+sumx2_h = sum(helper4)
+
+m_h  = ((n_2 * sumxy_h) - (sumx_h*sumy_h))/(n_2*sumx2_h-(sumx_h)^2)
+
+b_h = (sumy_h-m_h*sumx_h)/n_2
+
+Is_h = exp(b_h)
+
+n_h = q/(m_h*k*T) #peripoy iso me 2 
+
+y_line_h = m_h .* Voltage .+ b_h
+plot!(Voltage, y_line_h, label="Ευθεία y = ax + b για υψηλες τασεις.", color=:green, lw=2)
+savefig(plot_1_1, "../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/1 Με τις 2 ευθειες.png")
+#2h Proseggish me V_corr 
+n_2 = 5
+
+helper3 = Float64[]
+for i in 35:39
+    push!(helper3,ln_I[i]*V_corr[i])
+end
+
+helper4 = Float64[]
+for i in 35:39
+    push!(helper4 ,V_corr[i]^2)
+end
+
+sumx_h = sum(V_corr[35:39])
+sumy_h = sum(ln_I[35:39])
+sumxy_h = sum(helper3)
+sumx2_h = sum(helper4)
+
+m_h  = ((n_2 * sumxy_h) - (sumx_h*sumy_h))/(n_2*sumx2_h-(sumx_h)^2)
+
+b_h = (sumy_h-m_h*sumx_h)/n_2
+
+Is_h = exp(b_h)
+
+n_h = q/(m_h*k*T) #peripoy iso me 2 
+
+y_line_h = m_h .* Voltage .+ b_h
+plot!(V_corr, y_line_h, label="Ευθεία y = ax + b για υψηλες τασεις με διορθωμενη Ταση (R_s).", color=:blue, lw=2)
+savefig(plot_1_1, "../Fysikh-kai-Texnologia-Imiagwgwn/2h askhsh/plots/1 ΚΑΙ με διορθωμενη ταση.png")
