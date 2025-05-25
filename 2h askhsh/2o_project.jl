@@ -122,7 +122,7 @@ for i in eachindex(C)
 end
 
 E_max
-
+println(E_max)
 #? ε Ερωτημα -------------------->
 
 V_x_0 = Float64[]
@@ -132,7 +132,7 @@ for i in eachindex(C)
 end
 
 V_x_0
-
+println(V_x_0)
 #? στ Ερωτημα ---------------------------> ΠΛΟΤΣ
    
 #γ Ερωτημα ->
